@@ -1,5 +1,21 @@
+<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+
+- [Setup IntelliJ IDEA for Groovy Script](#setup-intellij-idea-for-groovy-script)
+   * [Download IntelliJ IDEA and Groovy Script](#download-intellij-idea-and-groovy-script)
+   * [Setup IntelliJ IDEA for Creating Groovy Script projects](#setup-intellij-idea-for-creating-groovy-script-projects)
+   * [Create Code Templates](#create-code-templates)
+      + [Groovy Script for CPI](#groovy-script-for-cpi)
+      + [Groovy Script for Testing CPI Script](#groovy-script-for-testing-cpi-script)
+      + [Groovy Script for Testing CPI Script and loading ValueMapping values from a file](#groovy-script-for-testing-cpi-script-and-loading-valuemapping-values-from-a-file)
+   * [Create first Test Example](#create-first-test-example)
+   * [Info about creation of Mapping.jar](#info-about-creation-of-mappingjar)
+
+<!-- TOC end -->
+
+<!-- TOC --><a name="setup-intellij-idea-for-groovy-script"></a>
 # Setup IntelliJ IDEA for Groovy Script
 
+<!-- TOC --><a name="download-intellij-idea-and-groovy-script"></a>
 ## Download IntelliJ IDEA and Groovy Script
 
 * Download Latest versions via links below, or check the [files](./files) folder
@@ -10,6 +26,7 @@
 * Download and install [nvm / nodejs](https://github.com/coreybutler/nvm-windows/releases), this allows you to install multiple nodejs versions and switch between runtime versions.
 
  
+<!-- TOC --><a name="setup-intellij-idea-for-creating-groovy-script-projects"></a>
 ## Setup IntelliJ IDEA for Creating Groovy Script projects
 
 * Start IDEA and create a new Project
@@ -44,7 +61,9 @@
 ![Libraries](images/Libraries.png)  
 * Restart IDEA
 
+<!-- TOC --><a name="create-code-templates"></a>
 ## Create Code Templates
+<!-- TOC --><a name="groovy-script-for-cpi"></a>
 ### Groovy Script for CPI
 * Create a **Groovy Script for CPI** Code Template
   * In the menu bar, choose **File - Settings**
@@ -104,12 +123,14 @@ def Message processData(Message message) {
     return message;
 }
 ```  
+<!-- TOC --><a name="groovy-script-for-testing-cpi-script"></a>
 ### Groovy Script for Testing CPI Script
 * Create a **Groovy Script for Testing CPI Script** Code Template
   * In the menu bar, choose **File - Settings**
   * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **Test CPI Script**
   * and use paste this code
-``` Groovy Script
+  * Here we set ValueMapping values directly in the test script
+```groovyscript=
 import com.sap.gateway.ip.core.customdev.util.Message
 import com.sap.it.api.mapping.ValueMappingApi
 import org.apache.camel.CamelContext
@@ -160,6 +181,7 @@ println('Properties:')
 msg.getProperties().each { key, value -> println("\$key = \$value") }
 ```  
 
+<!-- TOC --><a name="groovy-script-for-testing-cpi-script-and-loading-valuemapping-values-from-a-file"></a>
 ### Groovy Script for Testing CPI Script and loading ValueMapping values from a file
 * Create a **Groovy Script for Testing CPI Script and loading ValueMapping values from a file** Code Template
   * In the menu bar, choose **File - Settings**
@@ -242,6 +264,7 @@ def loadValueMappings(iFilename, iShow = false){
 
 ```
 
+<!-- TOC --><a name="create-first-test-example"></a>
 ## Create first Test Example
 * In this test example we are mocking the Value Mappings:
   * **DocType**
@@ -307,5 +330,6 @@ newProperty = newProperty
 Process finished with exit code 0
 ```    
 
+<!-- TOC --><a name="info-about-creation-of-mappingjar"></a>
 ## Info about creation of Mapping.jar
 [https://github.com/equaliseit/sap-cpi-mocks/tree/main](https://github.com/equaliseit/sap-cpi-mocks/tree/main)
