@@ -134,9 +134,14 @@ msg.setHeader("oldHeader", "oldHeaderValue")
 msg.setProperty("oldProperty", "oldPropertyValue")
 // Set up value mapping entries
 ValueMappingApi vmapi = ValueMappingApi.getInstance()
+// Doctypes
 vmapi.addEntry('S4', 'DocType', 'HDR', 'ACME', 'DocumentType', 'ACME-HDR')
+vmapi.addEntry('S4', 'DocType', 'L15', 'ACME', 'DocumentType', 'ACME-M20')
+vmapi.addEntry('S4', 'DocType', 'INV', 'ACME', 'DocumentType', 'ACME-INVOICE')
+// ProductCodes
 vmapi.addEntry('S4', 'ProductCode', 'M00001', 'ACME', 'Name', 'Beer')
 vmapi.addEntry('S4', 'ProductCode', '21243', 'ACME', 'Name', 'Fruit')
+vmapi.addEntry('S4', 'ProductCode', 'W12', 'ACME', 'Name', 'Wine')
 
 
 // Execute script
@@ -151,6 +156,11 @@ msg.getHeaders().each { key, value -> println("\$key = \$value") }
 println('Properties:')
 msg.getProperties().each { key, value -> println("\$key = \$value") }
 ```  
+* In this test example we are mocking the Value Mappings:
+  * **DocType**
+![DocType](images/DocTypes.png)
+  * **ProductCode**
+![ProductCode](images/ProductCodes.png)
 
 * Create your first example
   * In folder **in** create a new file **xxx.xml** and put in the following code
