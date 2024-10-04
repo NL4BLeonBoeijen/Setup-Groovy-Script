@@ -7,6 +7,7 @@
 * Download [Groovy Script 2.4.21](https://groovy.apache.org/download.html)
 * Download [IntelliJ IDEA Community Edition](https://www.jetbrains.com/idea/download/?section=windows)
 * Download [Script API](https://tools.hana.ondemand.com/#cloudintegration)
+* Download and install [nvm / nodejs](https://github.com/coreybutler/nvm-windows/releases), this allows you to install multiple nodejs versions and switch between runtime versions.
 
  
 ## Setup IntelliJ IDEA for Creating Groovy Script projects
