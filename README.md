@@ -1,5 +1,25 @@
+<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+
+- [Setup IntelliJ IDEA for Groovy Script](#setup-intellij-idea-for-groovy-script)
+   * [Download IntelliJ IDEA and Groovy Script](#download-intellij-idea-and-groovy-script)
+   * [Setup IntelliJ IDEA for Creating Groovy Script projects](#setup-intellij-idea-for-creating-groovy-script-projects)
+   * [Create Code Templates](#create-code-templates)
+      + [Groovy Script for CPI](#groovy-script-for-cpi)
+      + [Groovy Script for Testing CPI Script](#groovy-script-for-testing-cpi-script)
+      + [Groovy Script for Testing CPI Script and loading ValueMapping values from a file](#groovy-script-for-testing-cpi-script-and-loading-valuemapping-values-from-a-file)
+   * [Create Test Examples](#create-test-examples)
+      + [Value Mapping Example](#value-mapping-example)
+      + [With inline value mapping values](#with-inline-value-mapping-values)
+      + [With value mapping values from file](#with-value-mapping-values-from-file)
+   * [Basic Project Layout](#basic-project-layout)
+   * [Info about creation of Mapping.jar](#info-about-creation-of-mappingjar)
+
+<!-- TOC end -->
+
+<!-- TOC --><a name="setup-intellij-idea-for-groovy-script"></a>
 # Setup IntelliJ IDEA for Groovy Script
 
+<!-- TOC --><a name="download-intellij-idea-and-groovy-script"></a>
 ## Download IntelliJ IDEA and Groovy Script
 
 * Download Latest versions via links below, or check the [files](./files) folder
@@ -10,6 +30,7 @@
 * Download and install [nvm / nodejs](https://github.com/coreybutler/nvm-windows/releases), this allows you to install multiple nodejs versions and switch between runtime versions.
 
  
+<!-- TOC --><a name="setup-intellij-idea-for-creating-groovy-script-projects"></a>
 ## Setup IntelliJ IDEA for Creating Groovy Script projects
 
 * Start IDEA and create a new Project
@@ -44,12 +65,14 @@
 ![Libraries](images/Libraries.png)  
 * Restart IDEA
 
+<!-- TOC --><a name="create-code-templates"></a>
 ## Create Code Templates
+<!-- TOC --><a name="groovy-script-for-cpi"></a>
 ### Groovy Script for CPI
 * Create a **Groovy Script for CPI** Code Template
   * In the menu bar, choose **File - Settings**
   * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **CPI Script**
-  * and use paste this code
+  * and paste this code
 ``` Groovy Script
 import com.sap.gateway.ip.core.customdev.util.Message;
 import com.sap.it.api.mapping.ValueMappingApi;
@@ -104,12 +127,15 @@ def Message processData(Message message) {
     return message;
 }
 ```  
+<!-- TOC --><a name="groovy-script-for-testing-cpi-script"></a>
 ### Groovy Script for Testing CPI Script
 * Create a **Groovy Script for Testing CPI Script** Code Template
   * In the menu bar, choose **File - Settings**
   * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **Test CPI Script**
-  * and use paste this code
-``` Groovy Script
+  * and paste this code
+  * Here we set ValueMapping values directly in the test script
+![InlineValueMapping](images/InlineValueMappingValues.png)  
+``` 
 import com.sap.gateway.ip.core.customdev.util.Message
 import com.sap.it.api.mapping.ValueMappingApi
 import org.apache.camel.CamelContext
@@ -160,11 +186,17 @@ println('Properties:')
 msg.getProperties().each { key, value -> println("\$key = \$value") }
 ```  
 
+<!-- TOC --><a name="groovy-script-for-testing-cpi-script-and-loading-valuemapping-values-from-a-file"></a>
 ### Groovy Script for Testing CPI Script and loading ValueMapping values from a file
 * Create a **Groovy Script for Testing CPI Script and loading ValueMapping values from a file** Code Template
   * In the menu bar, choose **File - Settings**
   * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **Test CPI with Loading ValueMapping**
-  * and use paste this code
+  * and paste this code
+  * Here we set ValueMapping values by loading then from a file, the extra option at the end of the function shows the loaded Value Mappings in the result.
+![FileValueMapping](images/FileValueMappingValues.png)
+  *This file can be extraced from the zip file when you download a ValueMapping from CPI.
+![DownloadValueMapping](images/DownloadValueMapping.png)
+![ValueMappingFileInZip](images/ValueMappingInZipFile.png)    
 ```
 import com.sap.gateway.ip.core.customdev.util.Message
 import com.sap.it.api.mapping.ValueMappingApi
@@ -242,15 +274,20 @@ def loadValueMappings(iFilename, iShow = false){
 
 ```
 
-## Create first Test Example
-* In this test example we are mocking the Value Mappings:
-  * **DocType**
+<!-- TOC --><a name="create-test-examples"></a>
+## Create Test Examples
+<!-- TOC --><a name="value-mapping-example"></a>
+### Value Mapping Example
+* **DocType**
 ![DocType](images/DocTypes.png)
-  * **ProductCode**
+* **ProductCode**
 ![ProductCode](images/ProductCodes.png)
 
-* Create your first example
-  * In folder **in** create a new file **xxx.xml** and put in the following code
+<!-- TOC --><a name="with-inline-value-mapping-values"></a>
+### With inline value mapping values
+In this test example we are mocking the Value Mappings in the test script:
+
+* In folder **in** create a new file **xxx.xml** and put in the following code
 ```
     <Order>
         <Header>
@@ -274,38 +311,33 @@ def loadValueMappings(iFilename, iShow = false){
 ```  
   * In folder **src/main** right click and select **New - CPI Script** and name it **xxx** 
   * In folder **src/test** right clikc and select **New - Test CPI Script** and name it also **xxx**
+    * Mock Value Mappings
+![InlineValueMapping](images/InlineValueMappingValues.png)    
   * run your test script
     * Right click on the **xxx.groovy** file in the **test** folder and select **Run 'xxx'**
     * This should give you the following result:
-```
-Body:
-<PurchaseOrder>
-  <Header>
-    <ID>4900000045</ID>
-    <DocumentDate>2024-10-04</DocumentDate>
-  </Header>
-  <Item>
-    <ItemNumber>001</ItemNumber>
-    <ProductCode>M00001</ProductCode>
-    <ProductDescription>Beer</ProductDescription>
-    <Quantity>12.5</Quantity>
-  </Item>
-  <Item>
-    <ItemNumber>002</ItemNumber>
-    <ProductCode>21243</ProductCode>
-    <ProductDescription>Fruit</ProductDescription>
-    <Quantity>40</Quantity>
-  </Item>
-</PurchaseOrder>
-Headers:
-oldHeader = oldHeaderValue modified
-newHeader = newHeader
-Properties:
-oldProperty = oldPropertyValue modified
-newProperty = newProperty
+![ResultInlineValues](images/ResultInlineValues.png)
 
-Process finished with exit code 0
-```    
+<!-- TOC --><a name="with-value-mapping-values-from-file"></a>
+### With value mapping values from file
+* In this test example we are mocking the Value Mappings by loading a ValueMapping file into the test script:
+* We will user the same input file and main file as in the previous example **xxx.xml** & **xxx.groovy**
+* But we will create a new test script **Test CPI with Loading ValueMapping**
+* In folder **src/test** right clikc and select **New - Test CPI with Loading ValueMappingt** and name it **xxxExtra**
+* Create an new folder **ValueMappings** in the folder **data**
+* Create a new folder **Example** in the folder **ValueMappings**
+* Copy the file **value_mapping.xml** that is in this Github folder files and save it in the new folder **Example**
+* This test script loads the valueMapping.xml file and shows the value mappings in the output
 
+* run your test script
+    * Right click on the **xxxExtra.groovy** file in the **test** folder and select **Run 'xxxExtra'**
+    * This should give you the following result:
+![ResultLoadedValues](images/ResultsLoadedValues.png)
+
+<!-- TOC --><a name="basic-project-layout"></a>
+## Basic Project Layout
+![ProjectLayout](images/ProjectLayout.png)
+
+<!-- TOC --><a name="info-about-creation-of-mappingjar"></a>
 ## Info about creation of Mapping.jar
 [https://github.com/equaliseit/sap-cpi-mocks/tree/main](https://github.com/equaliseit/sap-cpi-mocks/tree/main)
