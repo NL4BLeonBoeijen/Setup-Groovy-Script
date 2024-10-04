@@ -20,6 +20,30 @@
   * JDK: sap-1.8, Point to c:\program files\sapjvm_8 folder
   * Groovy SDK: 2.4.21
 
+
+* Configure the Modules in the Project Structure : choose: **File - Project Structure**
+  * Goto **Project Settings - Modules**
+  * Select Sources Tab
+  * Unmark the *Sources* from the **src** folder
+  * Create new **main** and **test** folders in the **src** folder
+  * Mark the *Sources* to the **main** folder
+  * Mark the *Tests* tab to the **test** folder
+  * Create new **data** in the root folder
+  * Create new **in** and **out** folders in the **data** folder
+![Modules-Sources](images/Modules-Sources.png)  
+* Configure the Libraries in the Project Structure: choose: **File - Project Structure**
+  * Download the three jar files from this Github files folder and put them in the **lib** folder of this project.
+  * One by One add the following Java files to the project
+    * camel-core-2.24.1
+    * cloud.integration.script.apis-2.7.1.jar
+    * cpi-mock-msg.jar
+    * cpi-mapping-msg.jar
+  * Add the following Maven file to the project
+    * slf4j.simple:2.0.16 (latest version)
+  * Press Apply to save the changes
+![Libraries](images/Libraries.png)  
+
+* Restart IDEA
 * Create a **Groovy Script for CPI** Code Template
   * In the menu bar, choose **File - Settings**
   * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **CPI Script**
@@ -128,29 +152,6 @@ println('Properties:')
 msg.getProperties().each { key, value -> println("\$key = \$value") }
 ```  
 
-* Configure the Modules in the Project Structure : choose: **File - Project Structure**
-  * Goto **Project Settings - Modules**
-  * Select Sources Tab
-  * Unmark the *Sources* from the **src** folder
-  * Create new **main** and **test** folders in the **src** folder
-  * Mark the *Sources* to the **main** folder
-  * Mark the *Tests* tab to the **test** folder
-  * Create new **data** in the root folder
-  * Create new **in** and **out** folders in the **data** folder
-![Modules-Sources](images/Modules-Sources.png)  
-* Configure the Libraries in the Project Structure: choose: **File - Project Structure**
-  * Download the three jar files from this Github files folder and put them in the **lib** folder of this project.
-  * One by One add the following Java files to the project
-    * camel-core-2.24.1
-    * cloud.integration.script.apis-2.7.1.jar
-    * cpi-mock-msg.jar
-    * cpi-mapping-msg.jar
-  * Add the following Maven file to the project
-    * slf4j.simple:2.0.16 (latest version)
-  * Press Apply to save the changes
-![Libraries](images/Libraries.png)  
-
-* Start IDEA
 * Create your first example
   * In folder **in** create a new file **xxx.xml** and put in the following code
 ```
