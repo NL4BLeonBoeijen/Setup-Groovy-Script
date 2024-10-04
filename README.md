@@ -26,11 +26,43 @@
   * and use paste this code
 ``` Groovy Script
 import com.sap.gateway.ip.core.customdev.util.Message;
-import java.util.HashMap;
+import com.sap.it.api.mapping.ValueMappingApi;
+import com.sap.it.api.ITApiFactory;
+import groovy.xml.MarkupBuilder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 def Message processData(Message message) {
     //Body
-    def body = message.getBody();
+    Reader reader = message.getBody(Reader)
+    def Order = new XmlSlurper().parse(reader)
+    Writer writer = new StringWriter()
+    def builder = new MarkupBuilder(writer)
+
+    ValueMappingApi api = ITApiFactory.getService(ValueMappingApi, null)
+
+    def sourceDocType = Order.Header.DocType  as String;
+
+    def items = Order.Item.findAll { it.Valid.text() == 'true' }
+    builder.PurchaseOrder {
+            'Header' {
+            'ID' Order.Header.OrderNumber
+            'DocumentDate' LocalDate.parse(Order.Header.Date.text(), DateTimeFormatter.ofPattern('yyyyMMdd')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))
+           if (!items.size())
+               'DocumentType' api.getMappedValue('S4', 'DocType', sourceDocType, 'ACME', 'DocumentType')
+        }
+
+        items.each { item ->
+            'Item' {
+                'ItemNumber' item.ItemNumber.text().padLeft(3, '0')
+                'ProductCode' item.MaterialNumber
+                'ProductDescription' api.getMappedValue('S4','ProductCode', item.MaterialNumber.text(),'ACME','Name')
+                'Quantity' item.Quantity
+            }
+        }
+    }
+
+    message.setBody(writer.toString())
 /*To set the body, you can use the following method. Refer SCRIPT APIs document for more detail*/
     //message.setBody(body + " Body is modified");
     //Headers
@@ -52,6 +84,7 @@ def Message processData(Message message) {
   * and use paste this code
 ``` Groovy Script
 import com.sap.gateway.ip.core.customdev.util.Message
+import com.sap.it.api.mapping.ValueMappingApi
 import org.apache.camel.CamelContext
 import org.apache.camel.Exchange
 import org.apache.camel.impl.DefaultCamelContext
@@ -75,6 +108,12 @@ msg.setBody(exchange.getIn().getBody())
 msg.setHeader("oldHeader", "oldHeaderValue")
 // Set exchange properties
 msg.setProperty("oldProperty", "oldPropertyValue")
+// Set up value mapping entries
+ValueMappingApi vmapi = ValueMappingApi.getInstance()
+vmapi.addEntry('S4', 'DocType', 'HDR', 'ACME', 'DocumentType', 'ACME-HDR')
+vmapi.addEntry('S4', 'ProductCode', 'M00001', 'ACME', 'Name', 'Beer')
+vmapi.addEntry('S4', 'ProductCode', '21243', 'ACME', 'Name', 'Fruit')
+
 
 // Execute script
 script1.processData(msg)
@@ -98,23 +137,42 @@ msg.getProperties().each { key, value -> println("\$key = \$value") }
   * Mark the *Tests* tab to the **test** folder
   * Create new **data** in the root folder
   * Create new **in** and **out** folders in the **data** folder
+![Modules-Sources](images/Modules-Sources.png)  
 * Configure the Libraries in the Project Structure: choose: **File - Project Structure**
   * Download the three jar files from this Github files folder and put them in the **lib** folder of this project.
   * One by One add the following Java files to the project
     * camel-core-2.24.1
     * cloud.integration.script.apis-2.7.1.jar
     * cpi-mock-msg.jar
+    * cpi-mapping-msg.jar
   * Add the following Maven file to the project
     * slf4j.simple:2.0.16 (latest version)
   * Press Apply to save the changes
+![Libraries](images/Libraries.png)  
 
 * Start IDEA
 * Create your first example
   * In folder **in** create a new file **xxx.xml** and put in the following code
 ```
-<Root>
-    <data>Hello</data>
-</Root>
+    <Order>
+        <Header>
+            <OrderNumber>4900000045</OrderNumber>
+            <DocType>HDR</DocType>
+            <Date>20241004</Date>
+        </Header>
+        <Item>
+            <Valid>true</Valid>
+            <ItemNumber>1</ItemNumber>
+            <MaterialNumber>M00001</MaterialNumber>
+            <Quantity>12.5</Quantity>
+        </Item>
+        <Item>
+            <Valid>true</Valid>
+            <ItemNumber>2</ItemNumber>
+            <MaterialNumber>21243</MaterialNumber>
+            <Quantity>40</Quantity>
+        </Item>
+    </Order>
 ```  
   * In folder **src/main** right click and select **New - CPI Script** and name it **xxx** 
   * In folder **src/test** right clikc and select **New - Test CPI Script** and name it also **xxx**
@@ -122,11 +180,25 @@ msg.getProperties().each { key, value -> println("\$key = \$value") }
     * Right click on the **xxx.groovy** file in the **test** folder and select **Run 'xxx'**
     * This should give you the following result:
 ```
-[main] INFO org.apache.camel.impl.converter.DefaultTypeConverter - Type converters loaded (core: 195, classpath: 0)
 Body:
-<Root>
-    <data>Hello</data>
-</Root>
+<PurchaseOrder>
+  <Header>
+    <ID>4900000045</ID>
+    <DocumentDate>2024-10-04</DocumentDate>
+  </Header>
+  <Item>
+    <ItemNumber>001</ItemNumber>
+    <ProductCode>M00001</ProductCode>
+    <ProductDescription>Beer</ProductDescription>
+    <Quantity>12.5</Quantity>
+  </Item>
+  <Item>
+    <ItemNumber>002</ItemNumber>
+    <ProductCode>21243</ProductCode>
+    <ProductDescription>Fruit</ProductDescription>
+    <Quantity>40</Quantity>
+  </Item>
+</PurchaseOrder>
 Headers:
 oldHeader = oldHeaderValue modified
 newHeader = newHeader
@@ -136,3 +208,6 @@ newProperty = newProperty
 
 Process finished with exit code 0
 ```    
+
+## Info about creation of Mapping.jar
+[https://github.com/equaliseit/sap-cpi-mocks/tree/main](https://github.com/equaliseit/sap-cpi-mocks/tree/main)
