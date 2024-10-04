@@ -156,6 +156,90 @@ msg.getHeaders().each { key, value -> println("\$key = \$value") }
 println('Properties:')
 msg.getProperties().each { key, value -> println("\$key = \$value") }
 ```  
+
+* Create a **Groovy Script for Testing CPI Script and loading ValueMapping values from a file** Code Template
+  * In the menu bar, choose **File - Settings**
+  * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **Test CPI with Loading ValueMapping**
+  * and use paste this code
+```
+import com.sap.gateway.ip.core.customdev.util.Message
+import com.sap.it.api.mapping.ValueMappingApi
+import org.apache.camel.CamelContext
+import org.apache.camel.Exchange
+import org.apache.camel.impl.DefaultCamelContext
+import org.apache.camel.impl.DefaultExchange
+
+// Load Groovy Script
+GroovyShell shell = new GroovyShell()
+Script script1 = shell.parse(new File('../main/xxx.groovy'))
+//Script script2 = shell.parse(new File('../main/yyy.groovy'))
+//Script script3 = shell.parse(new File('../main/zzz.groovy'))
+// Initialize CamelContext and exchange for the message
+CamelContext context = new DefaultCamelContext()
+Exchange exchange = new DefaultExchange(context)
+Message msg = new Message(exchange)
+// Initialize the message body with the input file
+def body = new File('../../data/in/xxx.xml')
+// Set exchange body in case Type Conversion is required
+exchange.getIn().setBody(body)
+msg.setBody(exchange.getIn().getBody())
+// Initialize ValueMapping with input file
+ValueMappingApi vmapi = ValueMappingApi.getInstance();
+loadValueMappings('../../data/ValueMappings/Example/value_mapping.xml',true);
+
+// Set exchange headers
+msg.setHeader("oldHeader", "oldHeaderValue")
+// Set exchange properties
+msg.setProperty("oldProperty", "oldPropertyValue")
+// Set up custom value mapping entries
+//vmapi.addEntry(sourceAgency, sourceSchema, sourceValue, targetAgency, targetSchema, targetValue)
+//vmapi.addEntry('S4', 'DocType', 'HDR', 'ACME', 'DocumentType', 'ACME-HDR')
+
+
+// Execute script
+script1.processData(msg)
+//script2.processData(msg)
+//script3.processData(msg)
+exchange.getIn().setBody(msg.getBody())
+// Display results of script in console
+
+println("Body:\r\n${msg.getBody(String)}")
+println('Headers:')
+msg.getHeaders().each { key, value -> println("\$key = \$value") }
+println('Properties:')
+msg.getProperties().each { key, value -> println("\$key = \$value") }
+
+
+
+
+def loadValueMappings(iFilename, iShow = false){
+    ValueMappingApi vmapi = ValueMappingApi.getInstance();
+    def vMappingFile = new File(iFilename);
+    def vMapping = new XmlSlurper().parse(vMappingFile)
+    def vGroups = vMapping.children()
+    println("ValueMapping values from file: " + iFilename)
+    vGroups.each { group ->
+        if (iShow == true) {
+            println(group.entry[0].agency.text() + " " +
+                    group.entry[0].schema.text() + " " +
+                    group.entry[0].value.text() + " " +
+                    group.entry[1].agency.text() + " " +
+                    group.entry[1].schema.text() + " " +
+                    group.entry[1].value.text())
+        }
+        vmapi.addEntry(group.entry[0].agency.text(),
+                group.entry[0].schema.text(),
+                group.entry[0].value.text(),
+                group.entry[1].agency.text(),
+                group.entry[1].schema.text(),
+                group.entry[1].value.text())
+    }
+}
+
+
+```
+
+
 * In this test example we are mocking the Value Mappings:
   * **DocType**
 ![DocType](images/DocTypes.png)
