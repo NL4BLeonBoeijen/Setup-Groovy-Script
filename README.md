@@ -4,6 +4,7 @@
    * [Download IntelliJ IDEA and Groovy Script](#download-intellij-idea-and-groovy-script)
    * [Setup IntelliJ IDEA for Creating Groovy Script projects](#setup-intellij-idea-for-creating-groovy-script-projects)
    * [Create Code Templates](#create-code-templates)
+      + [Groovy Script CPI SAP](#groovy-script-cpi-sap)
       + [Groovy Script for CPI](#groovy-script-for-cpi)
       + [Groovy Script for Testing CPI Script](#groovy-script-for-testing-cpi-script)
       + [Groovy Script for Testing CPI Script and loading ValueMapping values from a file](#groovy-script-for-testing-cpi-script-and-loading-valuemapping-values-from-a-file)
@@ -12,7 +13,7 @@
       + [With inline value mapping values](#with-inline-value-mapping-values)
       + [With value mapping values from file](#with-value-mapping-values-from-file)
    * [Basic Project Layout](#basic-project-layout)
-   * [Info about creation of Mapping.jar](#info-about-creation-of-mappingjar)
+   * [Resources](#resources)
 
 <!-- TOC end -->
 
@@ -55,9 +56,8 @@
 * Configure the Libraries in the Project Structure: choose: **File - Project Structure**
   * Download the three jar files from this Github files folder and put them in the **lib** folder of this project.
   * One by One add the following Java files to the project
-    * camel-core-2.24.1
-    * cloud.integration.script.apis-2.7.1.jar
-    * cpi-mock-msg.jar
+    * camel-core-2.24.1.jar
+    * cpi-mock-mapping.msg.jar
     * cpi-mapping-msg.jar
   * Add the following Maven file to the project
     * slf4j.simple:2.0.16 (latest version)
@@ -67,6 +67,39 @@
 
 <!-- TOC --><a name="create-code-templates"></a>
 ## Create Code Templates
+<!-- TOC --><a name="groovy-script-cpi-sap"></a>
+### Groovy Script CPI SAP
+* Create a **Groovy Script like standard CPI SAP** Code Template
+  * In the menu bar, choose **File - Settings**
+  * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **CPI Script SAP**
+  * and paste this code
+``` Groovy Script
+/* Refer the link below to learn more about the use cases of script.
+https://help.sap.com/viewer/368c481cd6954bdfa5d0435479fd4eaf/Cloud/en-US/148851bf8192412cba1f9d2c17f4bd25.html
+
+If you want to know more about the SCRIPT APIs, refer the link below
+https://help.sap.com/doc/a56f52e1a58e4e2bac7f7adbf45b2e26/Cloud/en-US/index.html */
+import com.sap.gateway.ip.core.customdev.util.Message;
+import java.util.HashMap;
+
+def Message processData(Message message) {
+    //Body
+    def body = message.getBody();
+/*To set the body, you can use the following method. Refer SCRIPT APIs document for more detail*/
+    //message.setBody(body + " Body is modified");
+    //Headers
+    def headers = message.getHeaders();
+    def value = headers.get("oldHeader");
+    message.setHeader("oldHeader", value + " modified");
+    message.setHeader("newHeader", "newHeader");
+    //Properties
+    def properties = message.getProperties();
+    value = properties.get("oldProperty");
+    message.setProperty("oldProperty", value + " modified");
+    message.setProperty("newProperty", "newProperty");
+    return message;
+}
+```
 <!-- TOC --><a name="groovy-script-for-cpi"></a>
 ### Groovy Script for CPI
 * Create a **Groovy Script for CPI** Code Template
@@ -200,6 +233,7 @@ msg.getProperties().each { key, value -> println("\$key = \$value") }
 ```
 import com.sap.gateway.ip.core.customdev.util.Message
 import com.sap.it.api.mapping.ValueMappingApi
+import com.themuth.customdev.util.Mapping
 import org.apache.camel.CamelContext
 import org.apache.camel.Exchange
 import org.apache.camel.impl.DefaultCamelContext
@@ -220,8 +254,8 @@ def body = new File('../../data/in/xxx.xml')
 exchange.getIn().setBody(body)
 msg.setBody(exchange.getIn().getBody())
 // Initialize ValueMapping with input file
-ValueMappingApi vmapi = ValueMappingApi.getInstance();
-loadValueMappings('../../data/ValueMappings/Example/value_mapping.xml',true);
+Mapping mapping = new Mapping()
+mapping.loadValueMappings('../../data/ValueMappings/Example/value_mapping.xml', true);
 
 // Set exchange headers
 msg.setHeader("oldHeader", "oldHeaderValue")
@@ -244,34 +278,6 @@ println('Headers:')
 msg.getHeaders().each { key, value -> println("\$key = \$value") }
 println('Properties:')
 msg.getProperties().each { key, value -> println("\$key = \$value") }
-
-
-
-
-def loadValueMappings(iFilename, iShow = false){
-    ValueMappingApi vmapi = ValueMappingApi.getInstance();
-    def vMappingFile = new File(iFilename);
-    def vMapping = new XmlSlurper().parse(vMappingFile)
-    def vGroups = vMapping.children()
-    println("ValueMapping values from file: " + iFilename)
-    vGroups.each { group ->
-        if (iShow == true) {
-            println(group.entry[0].agency.text() + " " +
-                    group.entry[0].schema.text() + " " +
-                    group.entry[0].value.text() + " " +
-                    group.entry[1].agency.text() + " " +
-                    group.entry[1].schema.text() + " " +
-                    group.entry[1].value.text())
-        }
-        vmapi.addEntry(group.entry[0].agency.text(),
-                group.entry[0].schema.text(),
-                group.entry[0].value.text(),
-                group.entry[1].agency.text(),
-                group.entry[1].schema.text(),
-                group.entry[1].value.text())
-    }
-}
-
 ```
 
 <!-- TOC --><a name="create-test-examples"></a>
@@ -338,6 +344,7 @@ In this test example we are mocking the Value Mappings in the test script:
 ## Basic Project Layout
 ![ProjectLayout](images/ProjectLayout.png)
 
-<!-- TOC --><a name="info-about-creation-of-mappingjar"></a>
-## Info about creation of Mapping.jar
-[https://github.com/equaliseit/sap-cpi-mocks/tree/main](https://github.com/equaliseit/sap-cpi-mocks/tree/main)
+<!-- TOC --><a name="resources"></a>
+## Resources
+* [https://github.com/NL4BLeonBoeijen/sap-cpi-mocks](https://github.com/NL4BLeonBoeijen/sap-cpi-mocks)
+* [https://github.com/equaliseit/sap-cpi-mocks/tree/main](https://github.com/equaliseit/sap-cpi-mocks/tree/main)
