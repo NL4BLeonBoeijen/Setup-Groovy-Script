@@ -54,7 +54,7 @@
   * Create new **in** and **out** folders in the **data** folder
 ![Modules-Sources](images/Modules-Sources.png)  
 * Configure the Libraries in the Project Structure: choose: **File - Project Structure**
-  * Download the three jar files from this Github files folder and put them in the **lib** folder of this project.
+  * Download the two jar files from this Github files folder and put them in the **lib** folder of this project.
   * One by One add the following Java files to the project
     * camel-core-2.24.1.jar
     * cpi-mock-mapping.msg.jar
