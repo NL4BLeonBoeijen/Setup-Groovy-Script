@@ -58,7 +58,6 @@
   * One by One add the following Java files to the project
     * camel-core-2.24.1.jar
     * cpi-mock-mapping.msg.jar
-    * cpi-mapping-msg.jar
   * Add the following Maven file to the project
     * slf4j.simple:2.0.16 (latest version)
   * Press Apply to save the changes
