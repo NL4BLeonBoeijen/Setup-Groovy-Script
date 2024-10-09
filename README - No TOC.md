@@ -89,6 +89,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 def Message processData(Message message) {
+    def messageLog = messageLogFactory.getMessageLog(message)
+    def sourceMessage = message.getBody(String)
     //Body
     Reader reader = message.getBody(Reader)
     def Order = new XmlSlurper().parse(reader)
@@ -97,30 +99,28 @@ def Message processData(Message message) {
 
     ValueMappingApi api = ITApiFactory.getService(ValueMappingApi, null)
 
-    def sourceDocType = Order.Header.DocType  as String;
+    def sourceDocType = Order.Header.DocType as String;
 
     def items = Order.Item.findAll { it.Valid.text() == 'true' }
     builder.PurchaseOrder {
-            'Header' {
+        'Header' {
             'ID' Order.Header.OrderNumber
             'DocumentDate' LocalDate.parse(Order.Header.Date.text(), DateTimeFormatter.ofPattern('yyyyMMdd')).format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))
-           if (!items.size())
-               'DocumentType' api.getMappedValue('S4', 'DocType', sourceDocType, 'ACME', 'DocumentType')
+            if (!items.size())
+                'DocumentType' api.getMappedValue('S4', 'DocType', sourceDocType, 'ACME', 'DocumentType')
         }
 
         items.each { item ->
             'Item' {
                 'ItemNumber' item.ItemNumber.text().padLeft(3, '0')
                 'ProductCode' item.MaterialNumber
-                'ProductDescription' api.getMappedValue('S4','ProductCode', item.MaterialNumber.text(),'ACME','Name')
+                'ProductDescription' api.getMappedValue('S4', 'ProductCode', item.MaterialNumber.text(), 'ACME', 'Name')
                 'Quantity' item.Quantity
             }
         }
     }
 
     message.setBody(writer.toString())
-/*To set the body, you can use the following method. Refer SCRIPT APIs document for more detail*/
-    //message.setBody(body + " Body is modified");
     //Headers
     def headers = message.getHeaders();
     def value = headers.get("oldHeader");
@@ -131,6 +131,10 @@ def Message processData(Message message) {
     value = properties.get("oldProperty");
     message.setProperty("oldProperty", value + " modified");
     message.setProperty("newProperty", "newProperty");
+
+    messageLog.addCustomHeaderProperty("oldProperty", value as String)
+    messageLog.addAttachmentAsString("Source Payload", sourceMessage, "text/xml")
+
     return message;
 }
 ```  
@@ -139,120 +143,44 @@ def Message processData(Message message) {
   * In the menu bar, choose **File - Settings**
   * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **Test CPI Script**
   * and paste this code
-  * Here we set ValueMapping values directly in the test script
+  * ValueMapping values directly in the test script
 ![InlineValueMapping](images/InlineValueMappingValues.png)  
-``` 
-import com.sap.gateway.ip.core.customdev.util.Message
-import com.sap.it.api.mapping.ValueMappingApi
-import org.apache.camel.CamelContext
-import org.apache.camel.Exchange
-import org.apache.camel.impl.DefaultCamelContext
-import org.apache.camel.impl.DefaultExchange
-
-// Load Groovy Script
-GroovyShell shell = new GroovyShell()
-Script script1 = shell.parse(new File('../main/xxx.groovy'))
-//Script script2 = shell.parse(new File('../main/yyy.groovy'))
-//Script script3 = shell.parse(new File('../main/zzz.groovy'))
-// Initialize CamelContext and exchange for the message
-CamelContext context = new DefaultCamelContext()
-Exchange exchange = new DefaultExchange(context)
-Message msg = new Message(exchange)
-// Initialize the message body with the input file
-def body = new File('../../data/in/xxx.xml')
-// Set exchange body in case Type Conversion is required
-exchange.getIn().setBody(body)
-msg.setBody(exchange.getIn().getBody())
-// Set exchange headers
-msg.setHeader("oldHeader", "oldHeaderValue")
-// Set exchange properties
-msg.setProperty("oldProperty", "oldPropertyValue")
-// Set up value mapping entries
-ValueMappingApi vmapi = ValueMappingApi.getInstance()
-// Doctypes
-vmapi.addEntry('S4', 'DocType', 'HDR', 'ACME', 'DocumentType', 'ACME-HDR')
-vmapi.addEntry('S4', 'DocType', 'L15', 'ACME', 'DocumentType', 'ACME-M20')
-vmapi.addEntry('S4', 'DocType', 'INV', 'ACME', 'DocumentType', 'ACME-INVOICE')
-// ProductCodes
-vmapi.addEntry('S4', 'ProductCode', 'M00001', 'ACME', 'Name', 'Beer')
-vmapi.addEntry('S4', 'ProductCode', '21243', 'ACME', 'Name', 'Fruit')
-vmapi.addEntry('S4', 'ProductCode', 'W12', 'ACME', 'Name', 'Wine')
-
-
-// Execute script
-script1.processData(msg)
-//script2.processData(msg)
-//script3.processData(msg)
-exchange.getIn().setBody(msg.getBody())
-// Display results of script in console
-println("Body:\r\n${msg.getBody(String)}")
-println('Headers:')
-msg.getHeaders().each { key, value -> println("\$key = \$value") }
-println('Properties:')
-msg.getProperties().each { key, value -> println("\$key = \$value") }
-```  
-
-### Groovy Script for Testing CPI Script and loading ValueMapping values from a file
-* Create a **Groovy Script for Testing CPI Script and loading ValueMapping values from a file** Code Template
-  * In the menu bar, choose **File - Settings**
-  * Then under **Editor - File and Code Templates** use the (+) Sign and add the script: **Test CPI with Loading ValueMapping**
-  * and paste this code
-  * Here we set ValueMapping values by loading then from a file, the extra option at the end of the function shows the loaded Value Mappings in the result.
-![FileValueMapping](images/FileValueMappingValues.png)
-  *This file can be extraced from the zip file when you download a ValueMapping from CPI.
+  * Or ValueMapping via file
+  * This file can be extraced from the zip file when you download a ValueMapping from CPI.
 ![DownloadValueMapping](images/DownloadValueMapping.png)
-![ValueMappingFileInZip](images/ValueMappingInZipFile.png)    
-```
-import com.sap.gateway.ip.core.customdev.util.Message
+![ValueMappingFileInZip](images/ValueMappingInZipFile.png)   
+``` 
 import com.sap.it.api.mapping.ValueMappingApi
-import com.themuth.customdev.util.Mapping
-import org.apache.camel.CamelContext
-import org.apache.camel.Exchange
-import org.apache.camel.impl.DefaultCamelContext
-import org.apache.camel.impl.DefaultExchange
+import com.themuth.customdev.util.*
 
-// Load Groovy Script
-GroovyShell shell = new GroovyShell()
-Script script1 = shell.parse(new File('../main/xxx.groovy'))
-//Script script2 = shell.parse(new File('../main/yyy.groovy'))
-//Script script3 = shell.parse(new File('../main/zzz.groovy'))
-// Initialize CamelContext and exchange for the message
-CamelContext context = new DefaultCamelContext()
-Exchange exchange = new DefaultExchange(context)
-Message msg = new Message(exchange)
-// Initialize the message body with the input file
-def body = new File('../../data/in/xxx.xml')
-// Set exchange body in case Type Conversion is required
-exchange.getIn().setBody(body)
-msg.setBody(exchange.getIn().getBody())
-// Initialize ValueMapping with input file
 Mapping mapping = new Mapping()
-mapping.loadValueMappings('../../data/ValueMappings/Example/value_mapping.xml', true);
+ValueMappingApi vmapi = ValueMappingApi.getInstance()
 
+def bodyFile = new File('../../data/in/xxx.xml')
+def scriptFile = '../main/xxx.groovy'
 // Set exchange headers
-msg.setHeader("oldHeader", "oldHeaderValue")
+def aHeaders = ["oldHeader":"oldHeaderValue",
+                "oldHeader2":"oldHeaderValue2"]
 // Set exchange properties
-msg.setProperty("oldProperty", "oldPropertyValue")
-// Set up custom value mapping entries
-//vmapi.addEntry(sourceAgency, sourceSchema, sourceValue, targetAgency, targetSchema, targetValue)
-//vmapi.addEntry('S4', 'DocType', 'HDR', 'ACME', 'DocumentType', 'ACME-HDR')
+def aProperties = ["oldProperty":"oldPropertyValue",
+                   "oldProperty2":"oldPropertyValue2"]
+// Inline Value Mapping
+vmapi.addEntry('S4', 'Inline', 'In', 'ACME', 'Output', 'Out')
+// File Based Value Mapping
+mapping.loadValueMappings('../../data/ValueMappings/Example/value_mapping.xml');
 
 
-// Execute script
-script1.processData(msg)
-//script2.processData(msg)
-//script3.processData(msg)
-exchange.getIn().setBody(msg.getBody())
-// Display results of script in console
+//Run the test
+RunTest test = new RunTest()
+test.run(bodyFile,
+         scriptFile,
+         aHeaders,
+         aProperties,
+         true, true, true, true, true, true)
+```  
+![ExplainTestCall](images/ExplainTestCall.png)
 
-println("Body:\r\n${msg.getBody(String)}")
-println('Headers:')
-msg.getHeaders().each { key, value -> println("\$key = \$value") }
-println('Properties:')
-msg.getProperties().each { key, value -> println("\$key = \$value") }
-```
-
-## Create Test Examples
+## Create Test Example
 ### Value Mapping Example
 * **DocType**
 ![DocType](images/DocTypes.png)
@@ -285,28 +213,16 @@ In this test example we are mocking the Value Mappings in the test script:
     </Order>
 ```  
   * In folder **src/main** right click and select **New - CPI Script** and name it **xxx** 
-  * In folder **src/test** right clikc and select **New - Test CPI Script** and name it also **xxx**
-    * Mock Value Mappings
-![InlineValueMapping](images/InlineValueMappingValues.png)    
+  * In folder **src/test** right clikc and select **New - Test CPI Script** and name it **xxxTest**
+  * Create an new folder **ValueMappings** in the folder **data**
+  * Create a new folder **Example** in the folder **ValueMappings**
+  * Copy the file **value_mapping.xml** that is in this Github folder files and save it in the new folder **Example**
   * run your test script
-    * Right click on the **xxx.groovy** file in the **test** folder and select **Run 'xxx'**
+    * Right click on the **xxxTest.groovy** file in the **test** folder and select **Run 'xxxTest'**
     * This should give you the following result:
-![ResultInlineValues](images/ResultInlineValues.png)
 
-### With value mapping values from file
-* In this test example we are mocking the Value Mappings by loading a ValueMapping file into the test script:
-* We will user the same input file and main file as in the previous example **xxx.xml** & **xxx.groovy**
-* But we will create a new test script **Test CPI with Loading ValueMapping**
-* In folder **src/test** right clikc and select **New - Test CPI with Loading ValueMappingt** and name it **xxxExtra**
-* Create an new folder **ValueMappings** in the folder **data**
-* Create a new folder **Example** in the folder **ValueMappings**
-* Copy the file **value_mapping.xml** that is in this Github folder files and save it in the new folder **Example**
-* This test script loads the valueMapping.xml file and shows the value mappings in the output
-
-* run your test script
-    * Right click on the **xxxExtra.groovy** file in the **test** folder and select **Run 'xxxExtra'**
-    * This should give you the following result:
-![ResultLoadedValues](images/ResultsLoadedValues.png)
+![ResultTest1](images/ResultTest1.png)
+![ResultTest2](images/ResultTest2.png)
 
 ## Basic Project Layout
 ![ProjectLayout](images/ProjectLayout.png)
