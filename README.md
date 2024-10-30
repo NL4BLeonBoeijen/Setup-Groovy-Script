@@ -183,9 +183,13 @@ ValueMappingApi vmapi = ValueMappingApi.getInstance()
 def bodyFile = new File('../../data/in/xxx.xml')
 def scriptFile = '../main/xxx.groovy'
 // Set exchange headers
+// if no headers then 
+//def aHeaders = [:]
 def aHeaders = ["oldHeader":"oldHeaderValue",
                 "oldHeader2":"oldHeaderValue2"]
 // Set exchange properties
+// if no properties then
+//def aProperties = [:]
 def aProperties = ["oldProperty":"oldPropertyValue",
                    "oldProperty2":"oldPropertyValue2"]
 // Inline Value Mapping
