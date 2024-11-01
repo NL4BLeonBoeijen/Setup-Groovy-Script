@@ -1,4 +1,4 @@
-# Setup IntelliJ IDEA for Groovy Script
+# Setup IntelliJ IDEA for Groovy Script and Xslt
 
 ## Download IntelliJ IDEA and Groovy Script
 
@@ -10,34 +10,38 @@
 * Download and install [nvm / nodejs](https://github.com/coreybutler/nvm-windows/releases), this allows you to install multiple nodejs versions and switch between runtime versions.
 
  
-## Setup IntelliJ IDEA for Creating Groovy Script projects
+## Setup IntelliJ IDEA for Building and testing CPI Groovy Script and Xslt
 
 * Start IDEA and create a new Project
-  * Name: GroovyScripts
+  * Name: CpiMappings
   * Location: d:\
   * Language: Groovy
   * Build system: IntelliJ
   * JDK: sap-1.8, Point to c:\program files\sapjvm_8 folder
   * Groovy SDK: 2.4.21
 
-
 * Configure the Modules in the Project Structure : choose: **File - Project Structure**
   * Goto **Project Settings - Modules**
   * Select Sources Tab
-  * Unmark the *Sources* from the **src** folder
-  * Create new **main** and **test** folders in the **src** folder
+  * Delete src folder
+  * Create a new **_data** folder in the root folder
+  * Mark the *Test Resources* to the **_data** folder 
+  * Create new **in**, **out** and **valueMappings** folders in the **_data** folder
+  * Create a new **_GroovyMappings** in the root folder
+  * Create new **main** and **test** folders in the **_GroovyMappings** folder
   * Mark the *Sources* to the **main** folder
   * Mark the *Tests* tab to the **test** folder
-  * Create new **data** in the root folder
-  * Create new **in** and **out** folders in the **data** folder
+  * Create new **_XsltMappings** in the root folder
+  
 ![Modules-Sources](images/Modules-Sources.png)  
 * Configure the Libraries in the Project Structure: choose: **File - Project Structure**
-  * Download the two jar files from this Github files folder and put them in the **lib** folder of this project.
+  * Download the three jar files from this Github files folder and put them in the **lib** folder of this project.
   * One by One add the following Java files to the project
     * camel-core-2.24.1.jar
     * cpi-mock-mapping.msg.jar
+    * saxon-he-12.5.jar
   * Add the following Maven file to the project
-    * slf4j.simple:2.0.16 (latest version)
+    * slf4j-simple:2.0.16 (latest version)
   * Press Apply to save the changes
 ![Libraries](images/Libraries.png)  
 * Restart IDEA
@@ -156,31 +160,31 @@ import com.themuth.customdev.util.*
 Mapping mapping = new Mapping()
 ValueMappingApi vmapi = ValueMappingApi.getInstance()
 
-def bodyFile = new File('../../data/in/xxx.xml')
+def bodyFile = new File('../../_data/in/xxx.xml')
 def scriptFile = '../main/xxx.groovy'
 // Set exchange headers
 // if no headers then 
 //def aHeaders = [:]
-def aHeaders = ["oldHeader":"oldHeaderValue",
-                "oldHeader2":"oldHeaderValue2"]
+def aHeaders = ["oldHeader" : "oldHeaderValue",
+                "oldHeader2": "oldHeaderValue2"]
 // Set exchange properties
 // if no properties then
 //def aProperties = [:]
-def aProperties = ["oldProperty":"oldPropertyValue",
-                   "oldProperty2":"oldPropertyValue2"]
+def aProperties = ["oldProperty" : "oldPropertyValue",
+                   "oldProperty2": "oldPropertyValue2"]
 // Inline Value Mapping
 vmapi.addEntry('S4', 'Inline', 'In', 'ACME', 'Output', 'Out')
 // File Based Value Mapping
-mapping.loadValueMappings('../../data/ValueMappings/Example/value_mapping.xml');
+mapping.loadValueMappings('../../_data/valueMappings/xxx_value_mappping.xml');
 
 
 //Run the test
 RunTest test = new RunTest()
 test.run(bodyFile,
-         scriptFile,
-         aHeaders,
-         aProperties,
-         true, true, true, true, true, true)
+        scriptFile,
+        aHeaders,
+        aProperties,
+        true, true, true, true, true, true)
 ```  
 ![ExplainTestCall](images/ExplainTestCall.png)
 
@@ -196,39 +200,80 @@ In this test example we are mocking the Value Mappings in the test script:
 
 * In folder **in** create a new file **xxx.xml** and put in the following code
 ```
-    <Order>
-        <Header>
-            <OrderNumber>4900000045</OrderNumber>
-            <DocType>HDR</DocType>
-            <Date>20241004</Date>
-        </Header>
-        <Item>
-            <Valid>true</Valid>
-            <ItemNumber>1</ItemNumber>
-            <MaterialNumber>M00001</MaterialNumber>
-            <Quantity>12.5</Quantity>
-        </Item>
-        <Item>
-            <Valid>true</Valid>
-            <ItemNumber>2</ItemNumber>
-            <MaterialNumber>21243</MaterialNumber>
-            <Quantity>40</Quantity>
-        </Item>
-    </Order>
+<?xml version="1.0" encoding="UTF-8"?>
+<Order xmlns="urn:sap-com:document:sap:idoc:soap:messages">
+    <Header>
+        <OrderNumber>4900000045</OrderNumber>
+        <DocType>HDR</DocType>
+        <Date>20241004</Date>
+    </Header>
+    <Item>
+        <Valid>true</Valid>
+        <ItemNumber>1</ItemNumber>
+        <MaterialNumber>M00001</MaterialNumber>
+        <Quantity>12.5</Quantity>
+    </Item>
+    <Item>
+        <Valid>true</Valid>
+        <ItemNumber>2</ItemNumber>
+        <MaterialNumber>21243</MaterialNumber>
+        <Quantity>40</Quantity>
+    </Item>
+</Order>
 ```  
-  * In folder **src/main** right click and select **New - CPI Script** and name it **xxx** 
-  * In folder **src/test** right clikc and select **New - Test CPI Script** and name it **xxxTest**
-  * Create an new folder **ValueMappings** in the folder **data**
-  * Create a new folder **Example** in the folder **ValueMappings**
-  * Copy the file **value_mapping.xml** that is in this Github folder files and save it in the new folder **Example**
+  * In folder **_GroovyMappings/main** right click and select **New - CPI Script** and name it **xxx** 
+  * In folder **_GroovyMappings/test** right clikc and select **New - Test CPI Script** and name it **test_xxx**
+  * Copy the file **xxx_value_mapping.xml** that is in this Github folder files and save it in the new folder **_data/valueMappings**
   * run your test script
-    * Right click on the **xxxTest.groovy** file in the **test** folder and select **Run 'xxxTest'**
+    * Right click on the **test_xxx.groovy** file in the **test** folder and select **Run 'test_xxx'**
     * This should give you the following result:
 
 ![ResultTest1](images/ResultTest1.png)
 ![ResultTest2](images/ResultTest2.png)
 
-## Basic Project Layout
+## Add Xslt
+  * In folder **_XsltMappings** right click and select **New - File** and name it **xxx.xsl**
+  * and paste the code below, this is a small example to remove namespaces from a xml.
+```xslt
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="xml" indent="yes" encoding="UTF-8"/>
+    <xsl:template match="/">
+        <xsl:copy>
+            <xsl:apply-templates/>
+        </xsl:copy>
+    </xsl:template>
+    <xsl:template match="@*">
+        <xsl:attribute name="{local-name()}">
+            <xsl:value-of select="current()"/>
+        </xsl:attribute>
+    </xsl:template>
+    <xsl:template match="*">
+        <xsl:element name="{local-name()}">
+            <xsl:apply-templates select="@* | * | text()"/>
+        </xsl:element>
+    </xsl:template>
+    <xsl:template match="text()">
+        <xsl:copy>
+            <xsl:value-of select="current()"/>
+        </xsl:copy>
+    </xsl:template>
+</xsl:stylesheet>
+```
+  * then right click the **xxx.xsl** file and select **More Run/Debug -> Modify Run Configuration**
+  ![Modify Run Condiguration](images/ModifyRunConfiguration.png)
+  * Select the *XML input file*
+  * Select the **Show in default console**, this will output the result in the console, you can also write the result directly to a file, eg in you _data/out folder and then open that new file.
+  ![XsltSettings](images/xsltSettings.png)
+  * Next click Advanced and select **Use JDK** and point it to your java version.
+  ![XsltAdvancedSettings](images/xsltAdvancedSettings.png)
+  * Select **Apply** and **Ok**
+  * Now you can run the Xslt: right click the **xxx.sxl** file and select **Run xxx.xsl**
+  * This should be your result
+  ![XsltResult](images/xsltResult.png)
+
+
+## Full Project Layout
 ![ProjectLayout](images/ProjectLayout.png)
 
 ## Resources
