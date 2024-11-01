@@ -11,6 +11,8 @@
       + [Value Mapping Example](#value-mapping-example)
       + [With inline value mapping values](#with-inline-value-mapping-values)
    * [Add Xslt](#add-xslt)
+      + [Create your xsl file](#create-your-xsl-file)
+      + [Configure and run xsl file](#configure-and-run-xsl-file)
    * [Full Project Layout](#full-project-layout)
    * [Resources](#resources)
 
@@ -261,8 +263,13 @@ In this test example we are mocking the Value Mappings in the test script:
 
 <!-- TOC --><a name="add-xslt"></a>
 ## Add Xslt
-  * In folder **_XsltMappings** right click and select **New - File** and name it **xxx.xsl**
-  * and paste the code below, this is a small example to remove namespaces from a xml.
+* Install the Plugin **XPathView + XSLT**: choose: **File - Settings**
+* Then Plugins and search for **XPathView + XSLT** and select *Install*  
+![InstallPlugin](images/InstallPlugin.png)
+<!-- TOC --><a name="create-your-xsl-file"></a>
+### Create your xsl file
+* In folder **_XsltMappings** right click and select **New - File** and name it **xxx.xsl**
+* and paste the code below, this is a small example to remove namespaces from a xml.
 ```xslt
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -289,18 +296,19 @@ In this test example we are mocking the Value Mappings in the test script:
     </xsl:template>
 </xsl:stylesheet>
 ```
-  * then right click the **xxx.xsl** file and select **More Run/Debug -> Modify Run Configuration**
-  ![Modify Run Condiguration](images/ModifyRunConfiguration.png)
-  * Select the *XML input file*
-  * Select the **Show in default console**, this will output the result in the console, you can also write the result directly to a file, eg in you _data/out folder and then open that new file.
-  ![XsltSettings](images/xsltSettings.png)
-  * Next click Advanced and select **Use JDK** and point it to your java version.
-  ![XsltAdvancedSettings](images/xsltAdvancedSettings.png)
-  * Select **Apply** and **Ok**
-  * Now you can run the Xslt: right click the **xxx.sxl** file and select **Run xxx.xsl**
-  * This should be your result
-  ![XsltResult](images/xsltResult.png)
-
+<!-- TOC --><a name="configure-and-run-xsl-file"></a>
+### Configure and run xsl file
+* then right click the **xxx.xsl** file and select **More Run/Debug -> Modify Run Configuration**
+![Modify Run Condiguration](images/ModifyRunConfiguration.png)
+* Select the *XML input file*
+* Select the **Show in default console**, this will output the result in the console, you can also write the result directly to a file, eg in you _data/out folder and then open that new file.
+![XsltSettings](images/xsltSettings.png)
+* Next click Advanced and select **Use JDK** and point it to your java version.
+![XsltAdvancedSettings](images/xsltAdvancedSettings.png)
+* Select **Apply** and **Ok**
+* Now you can run the Xslt: right click the **xxx.sxl** file and select **Run xxx.xsl**
+* This should be your result
+![XsltResult](images/xsltResult.png)
 
 <!-- TOC --><a name="full-project-layout"></a>
 ## Full Project Layout
