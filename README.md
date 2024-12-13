@@ -28,7 +28,6 @@
 * Download [SAP JVM](https://tools.hana.ondemand.com/#cloud)
 * Download [Groovy Script 2.4.21](https://groovy.apache.org/download.html)
 * Download [IntelliJ IDEA Community Edition](https://www.jetbrains.com/idea/download/?section=windows)
-* Download [Script API](https://tools.hana.ondemand.com/#cloudintegration)
 * Download and install [nvm / nodejs](https://github.com/coreybutler/nvm-windows/releases), this allows you to install multiple nodejs versions and switch between runtime versions.
 
  
@@ -180,15 +179,16 @@ def Message processData(Message message) {
   * This file can be extraced from the zip file when you download a ValueMapping from CPI.
 ![DownloadValueMapping](images/DownloadValueMapping.png)
 ![ValueMappingFileInZip](images/ValueMappingInZipFile.png)   
-``` 
+``` Groovy Script
 import com.sap.it.api.mapping.ValueMappingApi
 import com.themuth.customdev.util.*
 
 Mapping mapping = new Mapping()
 ValueMappingApi vmapi = ValueMappingApi.getInstance()
 
-def bodyFile = new File('../../_data/in/xxx.xml')
 def scriptFile = '../main/xxx.groovy'
+def bodyFile = '../../_data/in/xxx.xml'
+def targetFile = '../../_data/out/xxx.xml'
 // Set exchange headers
 // if no headers then 
 //def aHeaders = [:]
@@ -207,13 +207,19 @@ mapping.loadValueMappings('../../_data/valueMappings/xxx_value_mappping.xml');
 
 //Run the test
 RunTest test = new RunTest()
-test.run(bodyFile,
-        scriptFile,
-        aHeaders,
-        aProperties,
-        true, true, true, true, true, true)
+def result = test.run(bodyFile,
+                      targetFile,
+                      scriptFile,
+                      aHeaders,
+                      aProperties,
+                      true, //Show Body in Console
+                      true, //Save Body to targetFile
+                      true, //Show Headers in Console
+                      true, //Show Properties in Console
+                      true, //Show CustomLogHeaders in Console
+                      true, //Show Attachments in Console
+                      true) //Show ValueMappings in Console
 ```  
-![ExplainTestCall](images/ExplainTestCall.png)
 
 <!-- TOC --><a name="create-test-example"></a>
 ## Create Test Example
@@ -229,7 +235,7 @@ test.run(bodyFile,
 In this test example we are mocking the Value Mappings in the test script:
 
 * In folder **in** create a new file **xxx.xml** and put in the following code
-```
+``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Order xmlns="urn:sap-com:document:sap:idoc:soap:messages">
     <Header>
