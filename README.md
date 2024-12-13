@@ -18,6 +18,7 @@
 
 <!-- TOC end -->
 
+<!--Use this link for generating ReadMe with TOC https://bitdowntoc.derlin.ch/ -->
 <!-- TOC --><a name="setup-intellij-idea-for-groovy-script-and-xslt"></a>
 # Setup IntelliJ IDEA for Groovy Script and Xslt
 
@@ -276,7 +277,7 @@ In this test example we are mocking the Value Mappings in the test script:
 ### Create your xsl file
 * In folder **_XsltMappings** right click and select **New - File** and name it **xxx.xsl**
 * and paste the code below, this is a small example to remove namespaces from a xml.
-```xslt
+``` xsl
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="3.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output method="xml" indent="yes" encoding="UTF-8"/>
