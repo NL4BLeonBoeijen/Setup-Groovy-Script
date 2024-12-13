@@ -1,5 +1,5 @@
 <!--Use this link for generating ReadMe with TOC https://bitdowntoc.derlin.ch/ -->
-# Setup IntelliJ IDEA for Groovy Script and Xslt
+# Setup IntelliJ IDEA for Groovy Script and Xslt 
 
 ## Download IntelliJ IDEA and Groovy Script
 

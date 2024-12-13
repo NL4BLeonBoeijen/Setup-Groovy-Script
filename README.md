@@ -3,7 +3,7 @@
 - [Setup IntelliJ IDEA for Groovy Script and Xslt](#setup-intellij-idea-for-groovy-script-and-xslt)
    * [Download IntelliJ IDEA and Groovy Script](#download-intellij-idea-and-groovy-script)
    * [Setup IntelliJ IDEA for Building and testing CPI Groovy Script and Xslt](#setup-intellij-idea-for-building-and-testing-cpi-groovy-script-and-xslt)
-   * [Create Code Templates](#create-code-templates)
+   * [Create Code Templates](#create-code-templates) 
       + [Groovy Script CPI SAP](#groovy-script-cpi-sap)
       + [Groovy Script for CPI](#groovy-script-for-cpi)
       + [Groovy Script for Testing CPI Script](#groovy-script-for-testing-cpi-script)
