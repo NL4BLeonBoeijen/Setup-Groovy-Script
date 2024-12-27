@@ -235,6 +235,9 @@ def result = test.run(bodyFile,
 ### With inline value mapping values
 In this test example we are mocking the Value Mappings in the test script:
 
+> [!IMPORTANT]
+> Let op
+
 * In folder **in** create a new file **xxx.xml** and put in the following code
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>

@@ -228,6 +228,9 @@ In this test example we are mocking the Value Mappings in the test script:
     </Item>
 </Order>
 ```  
+> [!IMPORTANT]
+> Let op
+
   * In folder **_GroovyMappings/main** right click and select **New - CPI Script** and name it **xxx** 
   * In folder **_GroovyMappings/test** right clikc and select **New - Test CPI Script** and name it **test_xxx**
   * Copy the file **xxx_value_mapping.xml** that is in this Github folder files and save it in the new folder **_data/valueMappings**
