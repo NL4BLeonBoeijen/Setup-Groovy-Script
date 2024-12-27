@@ -229,7 +229,8 @@ In this test example we are mocking the Value Mappings in the test script:
 </Order>
 ```  
 > [!IMPORTANT]
-> Let op
+> * If you want to debug your groovy scripts in IDEA then **do not** put spaces in the file name.
+> * If you have spaces in your file name then the groovy script will run but it will not stop at Breakpoints.
 
   * In folder **_GroovyMappings/main** right click and select **New - CPI Script** and name it **xxx** 
   * In folder **_GroovyMappings/test** right clikc and select **New - Test CPI Script** and name it **test_xxx**
